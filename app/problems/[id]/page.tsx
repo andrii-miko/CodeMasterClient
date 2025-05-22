@@ -46,6 +46,8 @@ export default function ProblemPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [userRating, setUserRating] = useState(0);
 
+  const firstTestResult = testResults.slice(0, 1);
+
   const problemId = params.id as string;
 
   useEffect(() => {
@@ -88,12 +90,12 @@ export default function ProblemPage() {
   }
 
   const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty.toUpperCase()) {
-      case "EASY":
+    switch (difficulty) {
+      case "easy":
         return "bg-green-500/10 text-green-500";
-      case "MEDIUM":
+      case "medium":
         return "bg-yellow-500/10 text-yellow-500";
-      case "HARD":
+      case "hard":
         return "bg-red-500/10 text-red-500";
       default:
         return "";
@@ -349,70 +351,74 @@ export default function ProblemPage() {
             </TabsContent>
             <TabsContent
               value="output"
-              className="h-[calc(100vh-300px)] min-h-[400px] flex flex-col"
+              className="h-[calc(100vh-300px)] min-h-[400px]"
             >
-              {testResults.length > 0 && (
-                <div className="mb-4 p-4 border rounded-md">
-                  <h3 className="text-lg font-medium mb-2">Test Results</h3>
-                  <div className="space-y-3">
-                    {testResults.map((result, index) => (
-                      <div key={index} className="p-3 border rounded-md">
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="font-medium">
-                            Test Case {index + 1}
-                          </span>
-                          {result.passed ? (
-                            <div className="flex items-center text-green-500">
-                              <CheckCircle className="h-4 w-4 mr-1" />
-                              <span>Passed</span>
+              <div className="h-full flex flex-col">
+                {testResults.length > 0 && (
+                  <div className="mb-4 p-4 border rounded-md">
+                    <h3 className="text-lg font-medium mb-2">Test Results</h3>
+                    <div className="space-y-3">
+                      {firstTestResult.map((result, index) => (
+                        <div key={index} className="p-3 border rounded-md">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="font-medium">
+                              Test Case {index + 1}
+                            </span>
+                            {result.passed ? (
+                              <div className="flex items-center text-green-500">
+                                <CheckCircle className="h-4 w-4 mr-1" />
+                                <span>Passed</span>
+                              </div>
+                            ) : (
+                              <div className="flex items-center text-red-500">
+                                <XCircle className="h-4 w-4 mr-1" />
+                                <span>Failed</span>
+                              </div>
+                            )}
+                          </div>
+                          {result.error ? (
+                            <div className="bg-red-50 dark:bg-red-900/20 p-2 rounded text-red-600 dark:text-red-400 text-sm flex items-start">
+                              <AlertCircle className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
+                              <span>{result.error}</span>
                             </div>
                           ) : (
-                            <div className="flex items-center text-red-500">
-                              <XCircle className="h-4 w-4 mr-1" />
-                              <span>Failed</span>
-                            </div>
+                            <>
+                              <div className="grid grid-cols-2 gap-2 text-sm">
+                                <div>
+                                  <p className="font-medium">Input:</p>
+                                  <pre className="bg-muted p-2 rounded-md whitespace-pre-wrap overflow-auto max-h-20">
+                                    {result.input}
+                                  </pre>
+                                </div>
+                                <div>
+                                  <p className="font-medium">
+                                    Expected Output:
+                                  </p>
+                                  <pre className="bg-muted p-2 rounded-md whitespace-pre-wrap overflow-auto max-h-20">
+                                    {result.expectedOutput}
+                                  </pre>
+                                </div>
+                              </div>
+                              <div className="mt-2 text-sm">
+                                <p className="font-medium">Your Output:</p>
+                                <pre className="bg-muted p-2 rounded-md whitespace-pre-wrap overflow-auto max-h-20">
+                                  {result.actualOutput}
+                                </pre>
+                              </div>
+                            </>
                           )}
                         </div>
-                        {result.error ? (
-                          <div className="bg-red-50 dark:bg-red-900/20 p-2 rounded text-red-600 dark:text-red-400 text-sm flex items-start">
-                            <AlertCircle className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
-                            <span>{result.error}</span>
-                          </div>
-                        ) : (
-                          <>
-                            <div className="grid grid-cols-2 gap-2 text-sm">
-                              <div>
-                                <p className="font-medium">Input:</p>
-                                <pre className="bg-muted p-2 rounded-md whitespace-pre-wrap overflow-auto max-h-20">
-                                  {result.input}
-                                </pre>
-                              </div>
-                              <div>
-                                <p className="font-medium">Expected Output:</p>
-                                <pre className="bg-muted p-2 rounded-md whitespace-pre-wrap overflow-auto max-h-20">
-                                  {result.expectedOutput}
-                                </pre>
-                              </div>
-                            </div>
-                            <div className="mt-2 text-sm">
-                              <p className="font-medium">Your Output:</p>
-                              <pre className="bg-muted p-2 rounded-md whitespace-pre-wrap overflow-auto max-h-20">
-                                {result.actualOutput}
-                              </pre>
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    ))}
+                      ))}
+                    </div>
+                    <div className="mt-3 text-sm font-medium">
+                      Summary: {testResults.filter((r) => r.passed).length} of{" "}
+                      {testResults.length} test cases passed
+                    </div>
                   </div>
-                  <div className="mt-3 text-sm font-medium">
-                    Summary: {testResults.filter((r) => r.passed).length} of{" "}
-                    {testResults.length} test cases passed
-                  </div>
+                )}
+                <div className="flex-1 p-4 bg-muted rounded-md font-mono text-sm whitespace-pre-wrap overflow-auto">
+                  {output || "Run your code to see output here..."}
                 </div>
-              )}
-              <div className="flex-1 p-4 bg-muted rounded-md font-mono text-sm whitespace-pre-wrap overflow-auto">
-                {output || "Run your code to see output here..."}
               </div>
             </TabsContent>
           </Tabs>
