@@ -88,6 +88,14 @@ export const ratingsApi = {
     );
     return response.data;
   },
+  getRating: async (taskId: string) => {
+    const response = await api.get<UserRatingResponseDto>(`/user-ratings/task/${taskId}`);
+    return response.data;
+  },
+  getUserRatings: async () => {
+    const response = await api.get<UserRatingResponseDto[]>("/user-ratings");
+    return response.data;
+  }
 };
 
 export const usersApi = {

@@ -22,6 +22,8 @@ import Markdown from "@/components/markdown";
 import { tasksApi } from "@/lib/api";
 import { runJavaScriptCode } from "@/lib/code-runner";
 import type { TaskResponseDTO } from "@/types";
+import { ratingsApi } from "@/lib/api";
+import { AxiosError } from "axios";
 
 type TestResult = {
   input: string;
@@ -57,6 +59,23 @@ export default function ProblemPage() {
         const data = await tasksApi.getTaskById(problemId);
         setProblem(data);
 
+        // Fetch user's rating for this problem
+        if (token) {
+          try {
+            const ratingData = await ratingsApi.getRating(problemId);
+            setUserRating(ratingData.rating);
+          } catch (error) {
+            // If it's a 404, it means no rating exists yet
+            if (error instanceof AxiosError && error.response?.status === 404) {
+              setUserRating(0);
+            } else {
+              // For other errors, log them but don't show to user
+              console.error("Failed to fetch rating:", error);
+              setUserRating(0);
+            }
+          }
+        }
+
         const starterCode = `// Write your solution for "${data.title}" here\n\nfunction solution(input) {\n  // Your code here\n  \n  // Return your answer\n  return null;\n}\n`;
         setCode(starterCode);
       } catch (error) {
@@ -75,7 +94,7 @@ export default function ProblemPage() {
     if (problemId) {
       fetchProblem();
     }
-  }, [problemId, router, toast]);
+  }, [problemId, router, toast, token]);
 
   if (isLoading) {
     return (
@@ -253,8 +272,19 @@ export default function ProblemPage() {
     setUserRating(rating);
     try {
       await rateProblem(problemId, rating);
+      toast({
+        title: "Rating submitted",
+        description: "Thank you for rating this problem!"
+      });
     } catch (error) {
       console.error("Rating error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to submit rating. Please try again.",
+        variant: "destructive"
+      });
+      // Revert the rating if submission failed
+      setUserRating(0);
     }
   };
 

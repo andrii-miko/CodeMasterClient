@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/auth-context";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,6 +21,7 @@ import type { TaskResponseDTO } from "@/types";
 
 export default function ProfilePage() {
   const { user, login, isLoading } = useAuth();
+  const router = useRouter();
   const [isLoadingProblems, setIsLoadingProblems] = useState(false);
 
   if (isLoading) {
@@ -42,7 +44,7 @@ export default function ProfilePage() {
           </CardHeader>
           <CardContent>
             <Button
-              onClick={() => login("test@example.com", "password")}
+              onClick={() => router.push("/login")}
               className="w-full"
             >
               Sign In
